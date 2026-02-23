@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:gotruck_customer/constants/colors.dart';
+import 'package:gotruck_customer/core/theme/colors.dart';
 import 'package:gotruck_customer/router/app_router.dart';
 
 class CustomSnackbar {
