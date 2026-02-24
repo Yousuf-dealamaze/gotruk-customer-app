@@ -115,7 +115,9 @@ class _OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen> {
     if (!mounted) return;
 
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(ok ? 'OTP resent successfully' : 'Failed to resend OTP')),
+      SnackBar(
+        content: Text(ok ? 'OTP resent successfully' : 'Failed to resend OTP'),
+      ),
     );
     if (ok) {
       _startTimer();
@@ -139,9 +141,9 @@ class _OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen> {
     if (!mounted) return;
 
     if (!ok) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Invalid OTP. Please try again.')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Invalid OTP. Please try again.')),
+      );
       return;
     }
 
@@ -210,153 +212,226 @@ class _OtpVerificationScreenState extends ConsumerState<OtpVerificationScreen> {
   }
 
   @override
+  @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
+
     return Scaffold(
-      backgroundColor: backgroundColor,
-      appBar: AppBar(backgroundColor: backgroundColor, elevation: 0),
-      body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 460),
-              child: Container(
-                padding: const EdgeInsets.all(22),
-                decoration: BoxDecoration(
-                  color: cardColor,
-                  borderRadius: BorderRadius.circular(18),
-                  boxShadow: [
-                    BoxShadow(
-                      color: shadowColor,
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      _buildStepIndicator(),
-                      if (_steps.length > 1) const SizedBox(height: 10),
-                      if (_steps.length > 1)
-                        Text(
-                          'Step ${_currentStep + 1} of ${_steps.length}',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(color: greyFont),
-                        ),
-                      if (_steps.length > 1) const SizedBox(height: 12),
-                      Center(
-                        child: Container(
-                          width: 64,
-                          height: 64,
-                          decoration: const BoxDecoration(
-                            shape: BoxShape.circle,
-                            gradient: LinearGradient(
-                              colors: [Color(0xFF10B981), Color(0xFF3B82F6)],
-                              begin: Alignment.centerLeft,
-                              end: Alignment.centerRight,
-                            ),
-                          ),
-                          child: Icon(
-                            _isPhoneType ? Icons.phone_iphone : Icons.email_outlined,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 14),
-                      Text(
-                        'Verify Your $_label',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: fontBlack,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 28,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        "We've sent a 6-digit code to $_targetValue",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(color: greyFont, fontSize: 16),
-                      ),
-                      const SizedBox(height: 24),
-                      Text(
-                        'Enter OTP',
-                        style: TextStyle(
-                          color: fontBlack,
-                          fontWeight: FontWeight.w600,
-                          fontSize: 16,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      TextFormField(
-                        controller: _otpController,
-                        keyboardType: TextInputType.number,
-                        maxLength: 6,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: fontBlack,
-                          fontSize: 22,
-                          letterSpacing: 5,
-                        ),
-                        decoration: InputDecoration(
-                          counterText: '',
-                          hintText: 'Enter 6-digit OTP',
-                          hintStyle: TextStyle(color: greyFont),
-                          filled: true,
-                          fillColor: cardColor,
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 16,
-                          ),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(14),
-                            borderSide: BorderSide(color: shadowColor),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(14),
-                            borderSide: BorderSide(color: shadowColor),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(14),
-                            borderSide: BorderSide(color: primaryColor, width: 1.5),
-                          ),
-                        ),
-                        validator: (value) {
-                          final otp = value?.trim() ?? '';
-                          if (otp.isEmpty) return 'OTP is required';
-                          if (otp.length != 6) return 'Enter a valid 6-digit OTP';
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 12),
-                      Center(
-                        child: _secondsLeft > 0
-                            ? Text(
-                                'Resend OTP in ${_secondsLeft}s',
-                                style: TextStyle(color: greyFont),
-                              )
-                            : TextButton(
-                                onPressed: _resendOtp,
-                                child: const Text(
-                                  'Resend OTP',
-                                  style: TextStyle(
-                                    color: Color(0xFF059669),
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ),
-                      ),
-                      const SizedBox(height: 10),
-                      AppButton(
-                        text: _isLastStep ? 'Verify OTP' : 'Verify & Next',
-                        isLoading: authState.isLoadingPhone,
-                        onPressed: _verifyOtp,
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFFF9FAFB), Color(0xFFEFF6FF)],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: SafeArea(
+          child: Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 460),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 28,
+                  ),
+                  decoration: BoxDecoration(
+                    color: cardColor,
+                    borderRadius: BorderRadius.circular(24),
+                    boxShadow: [
+                      BoxShadow(
+                        color: shadowColor.withOpacity(0.15),
+                        blurRadius: 20,
+                        offset: const Offset(0, 10),
                       ),
                     ],
+                  ),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        /// Step Indicator
+                        _buildStepIndicator(),
+
+                        if (_steps.length > 1) const SizedBox(height: 12),
+
+                        if (_steps.length > 1)
+                          Text(
+                            'Step ${_currentStep + 1} of ${_steps.length}',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(color: greyFont, fontSize: 14),
+                          ),
+
+                        const SizedBox(height: 20),
+
+                        /// Icon
+                        Center(
+                          child: Container(
+                            width: 72,
+                            height: 72,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              gradient: AppGradients.gradientPrimary,
+                            ),
+                            child: Icon(
+                              _isPhoneType
+                                  ? Icons.phone_iphone
+                                  : Icons.email_outlined,
+                              color: Colors.white,
+                              size: 32,
+                            ),
+                          ),
+                        ),
+
+                        const SizedBox(height: 20),
+
+                        /// Title
+                        Text(
+                          'Verify Your $_label',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: fontBlack,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 26,
+                          ),
+                        ),
+
+                        const SizedBox(height: 8),
+
+                        /// Subtitle
+                        Text(
+                          "We've sent a 6-digit code to",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(color: greyFont, fontSize: 15),
+                        ),
+
+                        const SizedBox(height: 4),
+
+                        Text(
+                          _targetValue,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: primaryColor,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+
+                        const SizedBox(height: 28),
+
+                        /// OTP Label
+                        Text(
+                          'Enter OTP',
+                          style: TextStyle(
+                            color: fontBlack,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 15,
+                          ),
+                        ),
+
+                        const SizedBox(height: 8),
+
+                        /// OTP Field
+                        TextFormField(
+                          controller: _otpController,
+                          keyboardType: TextInputType.number,
+                          maxLength: 6,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: fontBlack,
+                            fontSize: 24,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 6,
+                          ),
+                          decoration: InputDecoration(
+                            counterText: '',
+                            hintText: '••••••',
+                            hintStyle: TextStyle(
+                              color: greyFont.withOpacity(0.5),
+                              letterSpacing: 6,
+                            ),
+                            filled: true,
+                            fillColor: backgroundColor,
+                            contentPadding: const EdgeInsets.symmetric(
+                              vertical: 18,
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(16),
+                              borderSide: BorderSide.none,
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(16),
+                              borderSide: BorderSide(
+                                color: primaryColor,
+                                width: 1.5,
+                              ),
+                            ),
+                          ),
+                          validator: (value) {
+                            final otp = value?.trim() ?? '';
+                            if (otp.isEmpty) return 'OTP is required';
+                            if (otp.length != 6) {
+                              return 'Enter a valid 6-digit OTP';
+                            }
+                            return null;
+                          },
+                        ),
+
+                        const SizedBox(height: 16),
+
+                        /// Timer / Resend
+                        Center(
+                          child: _secondsLeft > 0
+                              ? Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const Icon(
+                                      Icons.timer_outlined,
+                                      size: 16,
+                                      color: Colors.grey,
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      'Resend in ${_secondsLeft}s',
+                                      style: TextStyle(color: greyFont),
+                                    ),
+                                  ],
+                                )
+                              : TextButton(
+                                  onPressed: _resendOtp,
+                                  child: const Text(
+                                    'Resend OTP',
+                                    style: TextStyle(
+                                      color: Color(0xFF059669),
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                        ),
+
+                        const SizedBox(height: 20),
+
+                        /// Button
+                        AppButton(
+                          text: _isLastStep ? 'Verify OTP' : 'Verify & Next',
+                          isLoading: authState.isLoadingPhone,
+                          onPressed: _verifyOtp,
+                        ),
+
+                        const SizedBox(height: 12),
+
+                        /// Footer
+                        Text(
+                          'Didn’t receive the code? Check spam or try again.',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(color: greyFont, fontSize: 12),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
