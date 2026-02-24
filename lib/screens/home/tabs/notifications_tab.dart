@@ -30,7 +30,11 @@ class NotificationsTab extends StatelessWidget {
                 color: const Color(0xFFE8EEF9),
                 shape: BoxShape.circle,
               ),
-              child: Icon(Icons.notifications_none, color: primaryColor, size: 32),
+              child: Icon(
+                Icons.notifications_none,
+                color: primaryColor,
+                size: 32,
+              ),
             ),
             const SizedBox(height: 18),
             Text(
@@ -76,7 +80,8 @@ class NotificationsTab extends StatelessWidget {
       ),
       (
         title: 'Your shipment is on the move',
-        subtitle: 'Your upcoming truck booking is\nscheduled for 04-03 at 10:30AM.',
+        subtitle:
+            'Your upcoming truck booking is\nscheduled for 04-03 at 10:30AM.',
         time: '1 day ago',
       ),
       (
@@ -128,7 +133,11 @@ class NotificationsTab extends StatelessWidget {
                           color: const Color(0xFFE8EEF9),
                           borderRadius: BorderRadius.circular(20),
                         ),
-                        child: Icon(Icons.notifications, color: primaryColor, size: 12),
+                        child: Icon(
+                          Icons.notifications,
+                          color: primaryColor,
+                          size: 12,
+                        ),
                       ),
                       const SizedBox(width: 10),
                       Expanded(
