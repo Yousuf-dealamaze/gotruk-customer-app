@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:gotruck_customer/screens/auth/auth_provider.dart';
 import 'package:gotruck_customer/core/theme/colors.dart';
+import 'package:gotruck_customer/screens/home/tabs/history_tab.dart';
+import 'package:gotruck_customer/screens/home/tabs/home_tab.dart';
+import 'package:gotruck_customer/screens/home/tabs/map_tab.dart';
+import 'package:gotruck_customer/screens/home/tabs/notifications_tab.dart';
+import 'package:gotruck_customer/screens/home/tabs/profile_tab.dart';
 
 class HomeShellScreen extends ConsumerStatefulWidget {
   const HomeShellScreen({super.key});
@@ -44,47 +50,26 @@ class _HomeShellScreenState extends ConsumerState<HomeShellScreen> {
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
+    debugPrint(authState.profileData?.displayName);
     final userName = authState.profileData?.displayName?.isNotEmpty == true
         ? authState.profileData?.displayName ?? ''
-        : 'GoTruck User';
+        : 'ronald richards';
+    final userEmail = authState.userData?.data.email.isNotEmpty == true
+        ? authState.userData?.data.email ?? ''
+        : 'ronaldrichards@gmail.com';
+    Future<void> handleLogout() async {
+      await ref.read(authProvider.notifier).logout();
+      if (!mounted) return;
+      context.go('/login');
+    }
 
     return Scaffold(
       backgroundColor: backgroundColor,
-      appBar: AppBar(
-        backgroundColor: cardColor,
-        surfaceTintColor: cardColor,
-        title: Text(
-          _tabs[_currentIndex].label,
-          style: TextStyle(color: fontBlack, fontWeight: FontWeight.w600),
-        ),
-        actions: [
-          IconButton(
-            onPressed: () => ref.read(authProvider.notifier).logout(),
-            icon: Icon(Icons.logout, color: primaryColor),
-            tooltip: 'Logout',
-          ),
-        ],
-      ),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                'Hello, $userName',
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  color: fontBlack,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              const SizedBox(height: 10),
-              Text(
-                'You are on ${_tabs[_currentIndex].label}.',
-                style: TextStyle(color: greyFont),
-              ),
-            ],
-          ),
+      body: SafeArea(
+        child: _buildCurrentTab(
+          userName: userName,
+          userEmail: userEmail,
+          onLogout: handleLogout,
         ),
       ),
       bottomNavigationBar: NavigationBar(
@@ -108,6 +93,27 @@ class _HomeShellScreenState extends ConsumerState<HomeShellScreen> {
             .toList(),
       ),
     );
+  }
+
+  Widget _buildCurrentTab({
+    required String userName,
+    required String userEmail,
+    required Future<void> Function() onLogout,
+  }) {
+    switch (_currentIndex) {
+      case 0:
+        return HomeTab(userName: userName, onLogout: onLogout);
+      case 1:
+        return const MapTab();
+      case 2:
+        return const HistoryTab();
+      case 3:
+        return const NotificationsTab(hasNotifications: true);
+      case 4:
+        return ProfileTab(name: userName, email: userEmail, onLogout: onLogout);
+      default:
+        return const SizedBox.shrink();
+    }
   }
 }
 

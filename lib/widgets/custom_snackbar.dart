@@ -60,7 +60,7 @@ class CustomSnackbar {
         borderRadius: BorderRadius.circular(borderRadius),
       ),
       margin: EdgeInsets.all(margin),
-      padding: EdgeInsets.all(padding),
+      padding: EdgeInsets.all(0),
     );
 
     ScaffoldMessenger.of(currentContext).showSnackBar(snackBar);

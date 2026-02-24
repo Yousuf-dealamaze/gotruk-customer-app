@@ -41,13 +41,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     if (!mounted) {
       return;
     }
-    if (!ok) {
-      final error = ref.read(authProvider).userData?.message ?? 'Login failed.';
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(error)));
+    if (ok) {
+      context.go('/home');
     }
-    context.go('/home');
   }
 
   @override

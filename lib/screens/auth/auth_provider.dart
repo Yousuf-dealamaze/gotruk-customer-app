@@ -8,6 +8,8 @@ import 'package:gotruck_customer/services/local_storage_service.dart';
 import 'package:gotruck_customer/widgets/custom_snackbar.dart';
 
 class AuthState {
+  static const Object _unset = Object();
+
   final bool isLoadingPhone;
   final bool isLoading;
   final LoginResponse? userData;
@@ -26,17 +28,21 @@ class AuthState {
 
   AuthState copyWith({
     bool? isLoading,
-    LoginResponse? userData,
+    Object? userData = _unset,
     bool? isLoadingPhone,
     bool? isGuestUser,
-    ProfileData? profileData,
+    Object? profileData = _unset,
   }) {
     return AuthState(
       isLoading: isLoading ?? this.isLoading,
-      userData: userData ?? this.userData,
+      userData: identical(userData, _unset)
+          ? this.userData
+          : userData as LoginResponse?,
       isLoadingPhone: isLoadingPhone ?? this.isLoadingPhone,
       isGuestUser: isGuestUser ?? this.isGuestUser,
-      profileData: profileData ?? this.profileData,
+      profileData: identical(profileData, _unset)
+          ? this.profileData
+          : profileData as ProfileData?,
     );
   }
 }
@@ -88,8 +94,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
     try {
       final Response response = await dioClient.dio.get('/users/profile');
       if (response.data['success'] == true) {
-        final profileData = ProfileData.fromJson(response.data);
-        await LocalStorageService().saveProfile(profileData);
+        final profileResponse = ProfileResponse.fromJson(response.data);
+        await LocalStorageService().saveProfile(profileResponse.data);
+        state = state.copyWith(profileData: profileResponse.data);
         return true;
       }
       return false;
@@ -278,17 +285,23 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   Future<void> logout() async {
     await LocalStorageService().clearSession();
-    state = state.copyWith(userData: null, isGuestUser: true);
+    state = state.copyWith(userData: null, profileData: null, isGuestUser: true);
   }
 
   Future<bool> restoreSessionFromStorage() async {
+    final localStorage = LocalStorageService();
     final savedSession = await LocalStorageService().getUserSession();
     if (savedSession == null) {
-      state = state.copyWith(userData: null, isGuestUser: true);
+      state = state.copyWith(userData: null, profileData: null, isGuestUser: true);
       return false;
     }
 
-    state = state.copyWith(userData: savedSession, isGuestUser: false);
+    final savedProfile = await localStorage.getProfile();
+    state = state.copyWith(
+      userData: savedSession,
+      profileData: savedProfile,
+      isGuestUser: false,
+    );
     return true;
   }
 }
