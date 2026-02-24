@@ -9,6 +9,7 @@ class LocalStorageService {
   static const _keyProfileData = 'profileData';
   static const _keyToken = 'token';
   static const _keyIsLoggedIn = 'isLoggedIn';
+  static const _keyHasSeenOnboarding = 'hasSeenOnboarding';
 
   Future<void> saveSession(LoginResponse loginResponse) async {
     final prefs = await SharedPreferences.getInstance();
@@ -60,6 +61,16 @@ class LocalStorageService {
   Future<bool> isLoggedIn() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getBool(_keyIsLoggedIn) ?? false;
+  }
+
+  Future<void> setHasSeenOnboarding(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_keyHasSeenOnboarding, value);
+  }
+
+  Future<bool> hasSeenOnboarding() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_keyHasSeenOnboarding) ?? false;
   }
 
   Future<void> clearSession() async {

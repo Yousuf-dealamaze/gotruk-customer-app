@@ -105,6 +105,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     String lname,
     String email,
     String phone,
+    String countryCode,
     String gender,
     String password,
     String confirmPassword,
@@ -135,19 +136,20 @@ class AuthNotifier extends StateNotifier<AuthState> {
           "displayName": "",
           "password": password,
           "status": "active",
+          "countryCode": countryCode,
         },
       );
       if (response.data['success'] == true) {
-        final userData = LoginResponse.fromJson(response.data['data']);
-        await LocalStorageService().saveSession(userData);
-        state = state.copyWith(userData: userData, isGuestUser: false);
+        await sendRegistrationOtps(
+          email: email,
+          phoneNumber: phone,
+          countryCode: countryCode,
+        );
         return true;
       }
       return false;
     } catch (e) {
-      debugPrint(
-        "--------------------------------------------------------------------------------",
-      );
+      debugPrint("--------------------------------------------------------");
       debugPrint(e.toString());
       return false;
     } finally {
@@ -179,31 +181,67 @@ class AuthNotifier extends StateNotifier<AuthState> {
     }
   }
 
-  Future<bool> generateOTP(String phone, String type) async {
-    setLoadingPhone(true);
-    if (phone == "") {
-      CustomSnackbar.show(message: "Please enter phone.");
-      setLoadingPhone(false);
-      return false;
-    }
+  Future<bool> sendOtp({
+    required String otpType,
+    String? email,
+    String? phoneNumber,
+    String? countryCode,
+  }) async {
     try {
-      final Response response = await dioClient.dio.post(
-        'generate-otp',
-        data: {"phone_number": phone, "type": type},
-      );
-      if (response.data['success'] == true) {
-        setLoadingPhone(false);
-        return true;
+      final data = <String, dynamic>{'otpType': otpType};
+      if (email != null && email.isNotEmpty) {
+        data['email'] = email;
       }
+      if (phoneNumber != null && phoneNumber.isNotEmpty) {
+        data['phoneNumber'] = phoneNumber;
+      }
+      if (countryCode != null && countryCode.isNotEmpty) {
+        data['countryCode'] = countryCode;
+      }
+
+      final Response response = await dioClient.dio.post(
+        '/otp/sendOtp',
+        data: data,
+      );
+      return response.data['success'] == true;
+    } catch (_) {
       return false;
-    } catch (e) {
-      return false;
-    } finally {
-      setLoadingPhone(false);
     }
   }
 
-  Future<bool> verifyOTP(String phone, String type, String otp) async {
+  Future<void> sendRegistrationOtps({
+    required String email,
+    required String phoneNumber,
+    required String countryCode,
+  }) async {
+    final otpPromises = <Future<bool>>[];
+
+    if (email.trim().isNotEmpty) {
+      otpPromises.add(sendOtp(otpType: 'email', email: email.trim()));
+    }
+
+    if (phoneNumber.trim().isNotEmpty) {
+      otpPromises.add(
+        sendOtp(
+          otpType: 'phone',
+          phoneNumber: phoneNumber.trim(),
+          countryCode: countryCode.trim(),
+        ),
+      );
+    }
+
+    if (otpPromises.isNotEmpty) {
+      await Future.wait(otpPromises);
+    }
+  }
+
+  Future<bool> verifyOTP({
+    required String otpType,
+    required String otp,
+    String? phoneNumber,
+    String? email,
+    String? countryCode,
+  }) async {
     setLoadingPhone(true);
     if (otp == "") {
       CustomSnackbar.show(message: "Please enter otp.");
@@ -211,9 +249,20 @@ class AuthNotifier extends StateNotifier<AuthState> {
       return false;
     }
     try {
+      final data = <String, dynamic>{'otpType': otpType, 'otp': otp};
+      if (phoneNumber != null && phoneNumber.isNotEmpty) {
+        data['phoneNumber'] = phoneNumber;
+      }
+      if (email != null && email.isNotEmpty) {
+        data['email'] = email;
+      }
+      if (countryCode != null && countryCode.isNotEmpty) {
+        data['countryCode'] = countryCode;
+      }
+
       final Response response = await dioClient.dio.post(
-        'verify-otp',
-        data: {"phone_number": phone, "type": type, "otp": otp},
+        '/otp/verifyOtp',
+        data: data,
       );
       if (response.data['success'] == true) {
         setLoadingPhone(false);

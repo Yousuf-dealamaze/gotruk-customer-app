@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:gotruck_customer/screens/auth/auth_provider.dart';
 import 'package:gotruck_customer/core/theme/colors.dart';
 import 'package:gotruck_customer/widgets/app_button.dart';
+import 'package:gotruck_customer/widgets/app_dropdown_field.dart';
+import 'package:gotruck_customer/widgets/app_phone_number_field.dart';
 import 'package:gotruck_customer/widgets/app_text_field.dart';
 
 class SignupScreen extends ConsumerStatefulWidget {
@@ -22,6 +24,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   final _genderController = TextEditingController();
+  String _countryCode = '+91';
 
   @override
   void dispose() {
@@ -48,6 +51,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
           _lnameController.text.trim(),
           _emailController.text.trim(),
           _mobileController.text.trim(),
+          _countryCode,
           _genderController.text.trim(),
           _passwordController.text.trim(),
           _confirmPasswordController.text.trim(),
@@ -62,7 +66,18 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text(error)));
+      return;
     }
+
+    context.push(
+      '/otp-verification',
+      extra: {
+        'type': 'phone',
+        'phoneNumber': _mobileController.text.trim(),
+        'email': _emailController.text.trim(),
+        'countryCode': _countryCode,
+      },
+    );
   }
 
   @override
@@ -111,7 +126,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                       const SizedBox(height: 20),
                       AppTextField(
                         controller: _fnameController,
-                        hintText: 'Full name',
+                        hintText: 'First name',
                         prefixIcon: Icons.person_outline,
                         validator: (value) {
                           if (value == null || value.trim().isEmpty) {
@@ -149,11 +164,12 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                         },
                       ),
                       const SizedBox(height: 12),
-                      AppTextField(
+                      AppPhoneNumberField(
                         controller: _mobileController,
                         hintText: 'Phone',
-                        keyboardType: TextInputType.phone,
-                        prefixIcon: Icons.phone_outlined,
+                        onCountryCodeChanged: (value) {
+                          _countryCode = value;
+                        },
                         validator: (value) {
                           if (value == null || value.trim().isEmpty) {
                             return 'Phone is required';
@@ -181,18 +197,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                         },
                       ),
                       const SizedBox(height: 12),
-                      AppTextField(
-                        controller: _genderController,
-                        hintText: 'Gender',
-                        prefixIcon: Icons.person_outline,
-                        validator: (value) {
-                          if (value == null || value.trim().isEmpty) {
-                            return 'Gender is required';
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 12),
+
                       AppTextField(
                         controller: _confirmPasswordController,
                         hintText: 'Confirm password',
@@ -204,6 +209,19 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                           }
                           if (value != _passwordController.text) {
                             return 'Passwords do not match';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 12),
+                      AppDropdownField(
+                        controller: _genderController,
+                        hintText: 'Gender',
+                        prefixIcon: Icons.person_outline,
+                        options: const ['male', 'female', 'other'],
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'Gender is required';
                           }
                           return null;
                         },

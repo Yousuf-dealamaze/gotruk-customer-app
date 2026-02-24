@@ -79,8 +79,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 child: Form(
                   key: _formKey,
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
+                      Center(
+                        child: Image.asset(
+                          'assets/images/logo.png',
+                          width: MediaQuery.of(context).size.width * 0.5,
+                          fit: BoxFit.contain,
+                          errorBuilder: (_, __, ___) =>
+                              const FlutterLogo(size: 110),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
                       Text(
                         'Welcome back',
                         style: textTheme.headlineSmall?.copyWith(

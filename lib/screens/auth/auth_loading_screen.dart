@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:gotruck_customer/core/theme/colors.dart';
 import 'package:gotruck_customer/screens/auth/auth_provider.dart';
+import 'package:gotruck_customer/services/local_storage_service.dart';
 
 class AuthLoadingScreen extends ConsumerStatefulWidget {
   const AuthLoadingScreen({super.key});
@@ -19,6 +20,13 @@ class _AuthLoadingScreenState extends ConsumerState<AuthLoadingScreen> {
   }
 
   Future<void> _bootstrapSession() async {
+    final hasSeenOnboarding = await LocalStorageService().hasSeenOnboarding();
+    if (!hasSeenOnboarding) {
+      if (!mounted) return;
+      context.go('/onboarding');
+      return;
+    }
+
     final hasSession = await ref
         .read(authProvider.notifier)
         .restoreSessionFromStorage();
