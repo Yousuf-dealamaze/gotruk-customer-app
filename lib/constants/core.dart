@@ -5,4 +5,5 @@ class Constant {
   static String assetImagePath = "assets/images/";
   static String fontsFamily = "Poppins";
   static String fontFamilyBold = "Poppins-Bold";
+  static String googleMapsApiKey = "AIzaSyDOq2veNWGd9DgilwzWYSWC_9xeES_bBgs";
 }

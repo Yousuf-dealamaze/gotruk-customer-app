@@ -10,13 +10,23 @@ import 'package:gotruck_customer/screens/home/tabs/notifications_tab.dart';
 import 'package:gotruck_customer/screens/home/tabs/profile_tab.dart';
 
 class HomeShellScreen extends ConsumerStatefulWidget {
-  const HomeShellScreen({super.key});
+  const HomeShellScreen({required this.tab, super.key});
+
+  final String tab;
 
   @override
   ConsumerState<HomeShellScreen> createState() => _HomeShellScreenState();
 }
 
 class _HomeShellScreenState extends ConsumerState<HomeShellScreen> {
+  static const List<String> _tabRoutes = <String>[
+    '/home/home',
+    '/home/map',
+    '/home/bookings',
+    '/home/notifications',
+    '/home/profile',
+  ];
+
   int _currentIndex = 0;
 
   final _tabs = const <_TabData>[
@@ -31,7 +41,7 @@ class _HomeShellScreenState extends ConsumerState<HomeShellScreen> {
       selectedIcon: Icons.location_on,
     ),
     _TabData(
-      label: 'History',
+      label: 'Bookings',
       icon: Icons.description_outlined,
       selectedIcon: Icons.description,
     ),
@@ -48,9 +58,22 @@ class _HomeShellScreenState extends ConsumerState<HomeShellScreen> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    _currentIndex = _indexFromTab(widget.tab);
+  }
+
+  @override
+  void didUpdateWidget(covariant HomeShellScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.tab != widget.tab) {
+      _currentIndex = _indexFromTab(widget.tab);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
-    debugPrint(authState.profileData?.displayName);
     final userName = authState.profileData?.displayName?.isNotEmpty == true
         ? authState.profileData?.displayName ?? ''
         : 'ronald richards';
@@ -75,9 +98,10 @@ class _HomeShellScreenState extends ConsumerState<HomeShellScreen> {
       bottomNavigationBar: NavigationBar(
         selectedIndex: _currentIndex,
         onDestinationSelected: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
+          if (index == _currentIndex) {
+            return;
+          }
+          context.go(_tabRoutes[index]);
         },
         backgroundColor: cardColor,
         indicatorColor: primaryColor.withValues(alpha: 0.14),
@@ -113,6 +137,23 @@ class _HomeShellScreenState extends ConsumerState<HomeShellScreen> {
         return ProfileTab(name: userName, email: userEmail, onLogout: onLogout);
       default:
         return const SizedBox.shrink();
+    }
+  }
+
+  int _indexFromTab(String tab) {
+    switch (tab) {
+      case 'home':
+        return 0;
+      case 'map':
+        return 1;
+      case 'bookings':
+        return 2;
+      case 'notifications':
+        return 3;
+      case 'profile':
+        return 4;
+      default:
+        return 0;
     }
   }
 }

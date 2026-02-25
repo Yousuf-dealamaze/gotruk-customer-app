@@ -7,6 +7,7 @@ import 'package:gotruck_customer/screens/auth/login_screen.dart';
 import 'package:gotruck_customer/screens/auth/auth_provider.dart';
 import 'package:gotruck_customer/screens/auth/otp_verification_screen.dart';
 import 'package:gotruck_customer/screens/auth/signup_screen.dart';
+import 'package:gotruck_customer/screens/home/tabs/home_tab/pricing_selection_page.dart';
 import 'package:gotruck_customer/screens/onboarding/onboarding_screen.dart';
 
 final navigatorKey = GlobalKey<NavigatorState>();
@@ -41,9 +42,27 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           );
         },
       ),
+      GoRoute(path: '/home', redirect: (context, state) => '/home/home'),
       GoRoute(
-        path: '/home',
-        builder: (context, state) => const HomeShellScreen(),
+        path: '/home/:tab',
+        builder: (context, state) {
+          final tab = state.pathParameters['tab'] ?? 'home';
+          return HomeShellScreen(tab: tab);
+        },
+      ),
+      GoRoute(
+        path: '/pricing-selection',
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>? ?? {};
+          return PricingSelectionPage(
+            sourceDetails: extra['sourceDetails'],
+            destinationDetails: extra['destinationDetails'],
+            distanceKm: extra['distanceKm'] as double,
+            vehicleQuantity: extra['vehicleQuantity'],
+            scheduledAt: extra['scheduledAt'] as DateTime,
+            bookingMode: extra['bookingMode'] as String,
+          );
+        },
       ),
     ],
     redirect: (context, state) {
@@ -66,7 +85,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       }
 
       if (isOnPublicRoute) {
-        return '/home';
+        return '/home/home';
       }
       return null;
     },

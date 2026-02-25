@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gotruck_customer/constants/core.dart';
 import 'package:gotruck_customer/core/theme/colors.dart';
 import 'package:gotruck_customer/router/app_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 void main() {
   runApp(const ProviderScope(child: MyApp()));
@@ -21,7 +22,7 @@ class MyApp extends ConsumerWidget {
       routerConfig: router,
       theme: ThemeData(
         useMaterial3: true,
-        fontFamily: Constant.fontsFamily,
+
         scaffoldBackgroundColor: backgroundColor,
         colorScheme: ColorScheme.light(
           primary: primaryColor,
@@ -46,10 +47,7 @@ class MyApp extends ConsumerWidget {
           fillColor: cardColor,
           hintStyle: TextStyle(color: greyFont),
         ),
-        textTheme: TextTheme(
-          bodyLarge: TextStyle(color: fontBlack),
-          bodyMedium: TextStyle(color: fontBlack),
-        ),
+        textTheme: GoogleFonts.notoSansTextTheme(),
       ),
     );
   }
