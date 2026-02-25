@@ -9,6 +9,7 @@ import 'package:gotruck_customer/screens/home/tabs/home_tab/booking_provider.dar
 import 'package:gotruck_customer/screens/home/home_provider.dart';
 import 'package:gotruck_customer/screens/home/tabs/home_tab/map_route_picker_screen.dart';
 import 'package:gotruck_customer/widgets/app_button.dart';
+import 'package:gotruck_customer/widgets/custom_snackbar.dart';
 
 class PricingSelectionPage extends ConsumerStatefulWidget {
   final LocationDetails sourceDetails;
@@ -36,11 +37,21 @@ class PricingSelectionPage extends ConsumerStatefulWidget {
 class _PricingSelectionPageState extends ConsumerState<PricingSelectionPage> {
   String? selectedId;
 
+  PricingRow? _selectedRow(List<PricingRow> rows) {
+    final id = selectedId;
+    if (id == null) return null;
+    for (final row in rows) {
+      if (row.id == id) return row;
+    }
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(homeProvider);
 
     final rows = state.pricingResponse?.data.rows ?? [];
+    final selectedRow = _selectedRow(rows);
 
     return Scaffold(
       appBar: AppBar(
@@ -49,39 +60,39 @@ class _PricingSelectionPageState extends ConsumerState<PricingSelectionPage> {
       ),
       body: rows.isEmpty
           ? const Center(child: Text("No Pricing Options Found"))
-          : ListView.builder(
+          : ListView(
               padding: const EdgeInsets.all(12),
-              itemCount: rows.length,
-              itemBuilder: (context, index) {
-                final item = rows[index];
-                final isSelected = selectedId == item.id;
-
-                return _PricingCard(
-                  row: item,
-                  isSelected: isSelected,
-                  onTap: () {
-                    setState(() {
-                      selectedId = item.id;
-                    });
-                  },
-                );
-              },
+              children: [
+                ...rows.map((item) {
+                  final isSelected = selectedId == item.id;
+                  return _PricingCard(
+                    row: item,
+                    isSelected: isSelected,
+                    onTap: () {
+                      setState(() {
+                        selectedId = item.id;
+                      });
+                    },
+                  );
+                }),
+                if (selectedRow != null)
+                  _SelectedCalculationSection(row: selectedRow),
+              ],
             ),
-      bottomNavigationBar: _buildBottomBar(rows),
+      bottomNavigationBar: _buildBottomBar(selectedRow),
     );
   }
 
   /// Bottom Confirm Button
-  Widget _buildBottomBar(List<PricingRow> rows) {
+  Widget _buildBottomBar(PricingRow? selected) {
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.all(12),
         child: AppButton(
           text: "Confirm Selection",
-          onPressed: selectedId == null
+          onPressed: selected == null
               ? null
               : () async {
-                  final selected = rows.firstWhere((e) => e.id == selectedId);
                   final response = await ref
                       .read(bookingFormProvider.notifier)
                       .createBooking({
@@ -98,12 +109,153 @@ class _PricingSelectionPageState extends ConsumerState<PricingSelectionPage> {
                         "booking_mode": widget.bookingMode,
                         "scheduled_at": widget.scheduledAt.toIso8601String(),
                       });
-                  debugPrint("response: $response");
                   if (response) {
+                    CustomSnackbar.show(
+                      message: "Booking created successfully",
+                      isSuccess: true,
+                    );
                     AppRouter.push('/home/bookings');
                   }
                 },
         ),
+      ),
+    );
+  }
+}
+
+class _SelectedCalculationSection extends StatelessWidget {
+  final PricingRow row;
+
+  const _SelectedCalculationSection({required this.row});
+
+  String _formatAmount(double value) => value.toStringAsFixed(2);
+  String _formatPercent(double value) => (value * 100).toStringAsFixed(0);
+
+  @override
+  Widget build(BuildContext context) {
+    final calc = row.calculation;
+    final code = row.currency.currencyCode;
+    // final symbol = row.currency.currencySymbol;
+
+    return Card(
+      elevation: 0,
+      margin: const EdgeInsets.only(top: 4),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: Colors.grey.shade200),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "Distance Breakdown",
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+            ),
+            const SizedBox(height: 10),
+            if (calc.breakdown.isEmpty)
+              const Text("No slab breakdown available")
+            else
+              ...calc.breakdown.map(
+                (item) => Padding(
+                  padding: const EdgeInsets.only(bottom: 6),
+                  child: Row(
+                    children: [
+                      Expanded(child: Text(item.slab)),
+                      Text("${item.distanceInSlab.toStringAsFixed(2)} km"),
+                      const SizedBox(width: 8),
+                      Text("${_formatAmount(item.slabAmount)} $code"),
+                    ],
+                  ),
+                ),
+              ),
+            const Divider(height: 20),
+            Text(
+              "Cost Summary",
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+            ),
+            const SizedBox(height: 10),
+            _SummaryRow(
+              label: "Base Price x ${calc.vehicleQty} vehicle(s)",
+              value: "${_formatAmount(calc.basePrice)} $code",
+            ),
+            _SummaryRow(
+              label: "Base Price Amount",
+              value: "${_formatAmount(calc.basePriceAmount)} $code",
+            ),
+            _SummaryRow(
+              label: "Distance Amount",
+              value: "${_formatAmount(calc.distanceAmount)} $code",
+            ),
+            _SummaryRow(
+              label:
+                  "Platform Charges (${_formatPercent(calc.rates.platformRate)}%)",
+              value: "${_formatAmount(calc.platformCharges)} $code",
+            ),
+            _SummaryRow(
+              label: "Gross Total",
+              value: "${_formatAmount(calc.grossTotal)} $code",
+              isBold: true,
+            ),
+            _SummaryRow(
+              label:
+                  "Service Tax (${_formatPercent(calc.rates.serviceTaxRate)}%)",
+              value: "${_formatAmount(calc.serviceTax)} $code",
+            ),
+            const Divider(height: 20),
+            Row(
+              children: [
+                const Expanded(
+                  child: Text(
+                    "Total Amount",
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                  ),
+                ),
+                Text(
+                  "${_formatAmount(calc.totalAmount)} $code",
+                  style: const TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SummaryRow extends StatelessWidget {
+  final String label;
+  final String value;
+  final bool isBold;
+
+  const _SummaryRow({
+    required this.label,
+    required this.value,
+    this.isBold = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final style = TextStyle(
+      fontWeight: isBold ? FontWeight.w700 : FontWeight.w400,
+      color: Colors.black87,
+    );
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        children: [
+          Expanded(child: Text(label, style: style)),
+          Text(value, style: style),
+        ],
       ),
     );
   }
