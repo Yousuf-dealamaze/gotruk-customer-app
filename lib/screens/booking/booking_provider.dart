@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/legacy.dart';
-import 'package:gotruck_customer/screens/home/tabs/home_tab/map_route_picker_screen.dart';
+import 'package:gotruck_customer/screens/booking/map_route_picker_screen.dart';
 import 'package:gotruck_customer/services/essential_dio_client.dart';
 
 class BookingAddressFormData {

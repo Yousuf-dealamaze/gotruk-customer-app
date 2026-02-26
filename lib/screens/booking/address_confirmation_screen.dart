@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gotruck_customer/screens/auth/auth_provider.dart';
-import 'package:gotruck_customer/screens/home/tabs/home_tab/booking_provider.dart';
-import 'package:gotruck_customer/screens/home/tabs/home_tab/map_route_picker_screen.dart';
+import 'package:gotruck_customer/screens/booking/booking_provider.dart';
+import 'package:gotruck_customer/screens/booking/map_route_picker_screen.dart';
 
 class AddressConfirmationScreen extends ConsumerStatefulWidget {
   const AddressConfirmationScreen({

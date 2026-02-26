@@ -3,8 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gotruck_customer/core/theme/colors.dart';
 import 'package:gotruck_customer/router/app_router.dart';
 import 'package:gotruck_customer/screens/home/home_provider.dart';
-import 'package:gotruck_customer/screens/home/tabs/home_tab/address_confirmation_screen.dart';
-import 'package:gotruck_customer/screens/home/tabs/home_tab/map_route_picker_screen.dart';
+import 'package:gotruck_customer/screens/booking/address_confirmation_screen.dart';
+import 'package:gotruck_customer/screens/booking/map_route_picker_screen.dart';
 import 'package:gotruck_customer/widgets/app_text_field.dart';
 
 class HomeTab extends ConsumerStatefulWidget {

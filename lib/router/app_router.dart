@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:gotruck_customer/models/pricing_response_model.dart';
 import 'package:gotruck_customer/screens/auth/auth_loading_screen.dart';
 import 'package:gotruck_customer/screens/home/home_shell_screen.dart';
 import 'package:gotruck_customer/screens/auth/login_screen.dart';
 import 'package:gotruck_customer/screens/auth/auth_provider.dart';
 import 'package:gotruck_customer/screens/auth/otp_verification_screen.dart';
 import 'package:gotruck_customer/screens/auth/signup_screen.dart';
-import 'package:gotruck_customer/screens/home/tabs/home_tab/pricing_selection_page.dart';
+import 'package:gotruck_customer/screens/booking/booking_success_screen.dart';
+import 'package:gotruck_customer/screens/booking/payment_option_screen.dart';
+import 'package:gotruck_customer/screens/booking/pricing_selection_page.dart';
 import 'package:gotruck_customer/screens/onboarding/onboarding_screen.dart';
 
 final navigatorKey = GlobalKey<NavigatorState>();
@@ -63,6 +66,30 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             bookingMode: extra['bookingMode'] as String,
           );
         },
+      ),
+      GoRoute(
+        path: '/payment-selection',
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>? ?? {};
+          final selectedPricing = extra['selectedPricing'] as PricingRow?;
+          final scheduledAt = extra['scheduledAt'] as DateTime?;
+
+          if (selectedPricing == null || scheduledAt == null) {
+            return const Scaffold(
+              body: Center(child: Text('Missing payment details')),
+            );
+          }
+
+          return PaymentOptionScreen(
+            selectedPricing: selectedPricing,
+            scheduledAt: scheduledAt,
+            bookingMode: (extra['bookingMode'] as String?) ?? 'Instant',
+          );
+        },
+      ),
+      GoRoute(
+        path: '/booking-success',
+        builder: (context, state) => const BookingSuccessScreen(),
       ),
     ],
     redirect: (context, state) {
