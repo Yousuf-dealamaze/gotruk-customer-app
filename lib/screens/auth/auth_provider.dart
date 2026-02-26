@@ -1,8 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/legacy.dart';
-import 'package:gotruck_customer/screens/auth/user_model.dart';
-import 'package:gotruck_customer/screens/auth/user_profile_model.dart';
+import 'package:gotruck_customer/models/user_model.dart';
+import 'package:gotruck_customer/models/user_profile_model.dart';
 import 'package:gotruck_customer/services/auth_dio_client.dart';
 import 'package:gotruck_customer/services/local_storage_service.dart';
 import 'package:gotruck_customer/widgets/custom_snackbar.dart';

@@ -1,7 +1,7 @@
 import 'dart:convert';
 
-import 'package:gotruck_customer/screens/auth/user_model.dart';
-import 'package:gotruck_customer/screens/auth/user_profile_model.dart';
+import 'package:gotruck_customer/models/user_model.dart';
+import 'package:gotruck_customer/models/user_profile_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LocalStorageService {
