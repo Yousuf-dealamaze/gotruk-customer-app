@@ -119,14 +119,23 @@ final appRouterProvider = Provider<GoRouter>((ref) {
   );
 
   AppRouter.attach(goRouter);
+  AppRouter.setSessionExpiredHandler(() async {
+    await ref.read(authProvider.notifier).logout();
+  });
   return goRouter;
 });
 
 class AppRouter {
   static GoRouter? _router;
+  static Future<void> Function()? _onSessionExpired;
+  static bool _isHandlingSessionExpired = false;
 
   static void attach(GoRouter router) {
     _router = router;
+  }
+
+  static void setSessionExpiredHandler(Future<void> Function() handler) {
+    _onSessionExpired = handler;
   }
 
   static void push(String location, {Object? extra}) {
@@ -135,6 +144,22 @@ class AppRouter {
 
   static void go(String location, {Object? extra}) {
     _router?.go(location, extra: extra);
+  }
+
+  static Future<void> handleSessionExpired() async {
+    if (_isHandlingSessionExpired) {
+      return;
+    }
+
+    _isHandlingSessionExpired = true;
+    try {
+      if (_onSessionExpired != null) {
+        await _onSessionExpired!();
+      }
+      _router?.go('/login');
+    } finally {
+      _isHandlingSessionExpired = false;
+    }
   }
 
   static void pop() {

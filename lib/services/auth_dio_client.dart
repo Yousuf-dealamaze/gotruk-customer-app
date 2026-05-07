@@ -64,11 +64,7 @@ class AuthDioClientService {
                 CustomSnackbar.show(
                   message: 'Session expired. Please login again.',
                 );
-                SharedPreferences prefs = await SharedPreferences.getInstance();
-                await prefs.clear();
-
-                // Navigate to login screen
-                AppRouter.go('/login');
+                await AppRouter.handleSessionExpired();
               }
               return handler.next(response);
             },
@@ -81,16 +77,11 @@ class AuthDioClientService {
                 CustomSnackbar.show(message: 'Password or Email Incorrect.');
                 return handler.reject(error);
               } else {
-                // Clear all local storage
-                SharedPreferences prefs = await SharedPreferences.getInstance();
-                await prefs.clear();
-
                 // Show error message
                 CustomSnackbar.show(
                   message: 'Session expired. Please login again.',
                 );
-                // Navigate to login screen
-                AppRouter.go('/login');
+                await AppRouter.handleSessionExpired();
 
                 return handler.reject(error);
               }
