@@ -97,6 +97,84 @@ class AuthNotifier extends StateNotifier<AuthState> {
     }
   }
 
+  Future<bool> loginWithOtp({
+    required String phoneNumber,
+    required String countryCode,
+  }) async {
+    setLoadingPhone(true);
+    if (phoneNumber.trim().isEmpty) {
+      CustomSnackbar.show(message: "Please enter phone number.");
+      setLoadingPhone(false);
+      return false;
+    }
+    if (countryCode.trim().isEmpty) {
+      CustomSnackbar.show(message: "Please select country code.");
+      setLoadingPhone(false);
+      return false;
+    }
+    try {
+      final Response response = await dioClient.dio.post(
+        '/auth/login-with-otp',
+        data: {
+          "phoneNumber": phoneNumber.trim(),
+          "countryCode": countryCode.trim(),
+        },
+      );
+      return response.data['success'] == true;
+    } catch (_) {
+      return false;
+    } finally {
+      setLoadingPhone(false);
+    }
+  }
+
+  Future<bool> verifyLoginOtp({
+    required String phoneNumber,
+    required String countryCode,
+    required String otp,
+  }) async {
+    setLoadingPhone(true);
+    if (phoneNumber.trim().isEmpty) {
+      CustomSnackbar.show(message: "Please enter phone number.");
+      setLoadingPhone(false);
+      return false;
+    }
+    if (otp.trim().isEmpty) {
+      CustomSnackbar.show(message: "Please enter otp.");
+      setLoadingPhone(false);
+      return false;
+    }
+    try {
+      final Response response = await dioClient.dio.post(
+        '/auth/verify-login-otp',
+        data: {
+          "phoneNumber": phoneNumber.trim(),
+          "countryCode": countryCode.trim(),
+          "otp": otp.trim(),
+        },
+      );
+      if (response.data['success'] == true) {
+        final userData = LoginResponse.fromJson(response.data);
+        final role = userData.data.role.trim().toLowerCase();
+        if (role != _allowedLoginRole) {
+          CustomSnackbar.show(
+            message: 'Only client accounts can login in this app.',
+          );
+          return false;
+        }
+        await LocalStorageService().saveSession(userData);
+        state = state.copyWith(userData: userData, isGuestUser: false);
+        getProfile();
+        return true;
+      }
+      return false;
+    } catch (_) {
+      return false;
+    } finally {
+      setLoadingPhone(false);
+    }
+  }
+
   Future<bool> getProfile() async {
     setLoading(true);
     try {
@@ -291,22 +369,112 @@ class AuthNotifier extends StateNotifier<AuthState> {
     }
   }
 
+  Future<String?> verifyResetOtp({
+    required String otpType,
+    required String otp,
+    String? phoneNumber,
+    String? email,
+    String? countryCode,
+  }) async {
+    setLoadingPhone(true);
+    if (otp.trim().isEmpty) {
+      CustomSnackbar.show(message: "Please enter otp.");
+      setLoadingPhone(false);
+      return null;
+    }
+    try {
+      final data = <String, dynamic>{'otpType': otpType, 'otp': otp.trim()};
+      if (phoneNumber != null && phoneNumber.isNotEmpty) {
+        data['phoneNumber'] = phoneNumber.trim();
+      }
+      if (email != null && email.isNotEmpty) {
+        data['email'] = email.trim();
+      }
+      if (countryCode != null && countryCode.isNotEmpty) {
+        data['countryCode'] = countryCode.trim();
+      }
+
+      final Response response = await dioClient.dio.post(
+        '/otp/verifyOtp',
+        data: data,
+      );
+      if (response.data['success'] == true) {
+        final dynamic responseData = response.data['data'];
+        if (responseData is Map<String, dynamic>) {
+          final token = responseData['resetToken'] ?? responseData['token'];
+          if (token is String && token.trim().isNotEmpty) {
+            return token.trim();
+          }
+        }
+        return '';
+      }
+      return null;
+    } catch (_) {
+      return null;
+    } finally {
+      setLoadingPhone(false);
+    }
+  }
+
+  Future<bool> resetPassword({
+    required String resetToken,
+    required String newPassword,
+  }) async {
+    setLoading(true);
+    if (resetToken.trim().isEmpty) {
+      CustomSnackbar.show(message: "Reset token missing. Verify OTP again.");
+      setLoading(false);
+      return false;
+    }
+    if (newPassword.trim().isEmpty) {
+      CustomSnackbar.show(message: "Please enter new password.");
+      setLoading(false);
+      return false;
+    }
+    try {
+      final Response response = await dioClient.dio.post(
+        '/auth/reset-password',
+        data: {
+          "resetToken": resetToken.trim(),
+          "newPassword": newPassword.trim(),
+        },
+      );
+      return response.data['success'] == true;
+    } catch (_) {
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  }
+
   Future<void> logout() async {
     await LocalStorageService().clearSession();
-    state = state.copyWith(userData: null, profileData: null, isGuestUser: true);
+    state = state.copyWith(
+      userData: null,
+      profileData: null,
+      isGuestUser: true,
+    );
   }
 
   Future<bool> restoreSessionFromStorage() async {
     final localStorage = LocalStorageService();
     final savedSession = await LocalStorageService().getUserSession();
     if (savedSession == null) {
-      state = state.copyWith(userData: null, profileData: null, isGuestUser: true);
+      state = state.copyWith(
+        userData: null,
+        profileData: null,
+        isGuestUser: true,
+      );
       return false;
     }
     final role = savedSession.data.role.trim().toLowerCase();
     if (role != _allowedLoginRole) {
       await localStorage.clearSession();
-      state = state.copyWith(userData: null, profileData: null, isGuestUser: true);
+      state = state.copyWith(
+        userData: null,
+        profileData: null,
+        isGuestUser: true,
+      );
       return false;
     }
 

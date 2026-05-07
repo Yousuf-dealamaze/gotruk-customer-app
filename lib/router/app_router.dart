@@ -6,6 +6,7 @@ import 'package:gotruck_customer/screens/auth/auth_loading_screen.dart';
 import 'package:gotruck_customer/screens/home/home_shell_screen.dart';
 import 'package:gotruck_customer/screens/auth/login_screen.dart';
 import 'package:gotruck_customer/screens/auth/auth_provider.dart';
+import 'package:gotruck_customer/screens/auth/forgot_password_screen.dart';
 import 'package:gotruck_customer/screens/auth/otp_verification_screen.dart';
 import 'package:gotruck_customer/screens/auth/signup_screen.dart';
 import 'package:gotruck_customer/screens/booking/booking_success_screen.dart';
@@ -25,6 +26,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const AuthLoadingScreen(),
       ),
       GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
+      GoRoute(
+        path: '/forgot-password',
+        builder: (context, state) => const ForgotPasswordScreen(),
+      ),
       GoRoute(
         path: '/signup',
         builder: (context, state) => const SignupScreen(),
@@ -95,7 +100,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     redirect: (context, state) {
       final authState = ref.read(authProvider);
       final location = state.matchedLocation;
-      final isOnAuthRoute = location == '/login' || location == '/signup';
+      final isOnAuthRoute =
+          location == '/login' ||
+          location == '/signup' ||
+          location == '/forgot-password';
       final isOnPublicRoute = isOnAuthRoute || location == '/onboarding';
 
       // Splash route decides where to navigate after checking local session.
