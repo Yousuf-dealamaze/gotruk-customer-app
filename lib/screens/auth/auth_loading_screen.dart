@@ -50,7 +50,7 @@ class _AuthLoadingScreenState extends ConsumerState<AuthLoadingScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Image.asset(
-              'assets/images/logo.png',
+              'assets/images/logo-final.png',
               width: MediaQuery.of(context).size.width * 0.5,
               fit: BoxFit.contain,
               errorBuilder: (_, __, ___) => const FlutterLogo(size: 110),

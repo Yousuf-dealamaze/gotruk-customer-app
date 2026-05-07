@@ -96,7 +96,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       ),
                       const SizedBox(height: 6),
                       Text(
-                        'Sign in to continue to GoTruck.',
+                        'Sign in to continue.',
                         style: textTheme.bodyMedium?.copyWith(color: greyFont),
                       ),
                       const SizedBox(height: 20),

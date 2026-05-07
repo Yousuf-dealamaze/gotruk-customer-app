@@ -50,6 +50,7 @@ class AuthState {
 class AuthNotifier extends StateNotifier<AuthState> {
   AuthNotifier() : super(AuthState());
   final dioClient = AuthDioClientService();
+  static const String _allowedLoginRole = 'client';
 
   void setLoading(bool isLoading) {
     state = state.copyWith(isLoading: isLoading);
@@ -76,6 +77,13 @@ class AuthNotifier extends StateNotifier<AuthState> {
       );
       if (response.data['success'] == true) {
         final userData = LoginResponse.fromJson(response.data);
+        final role = userData.data.role.trim().toLowerCase();
+        if (role != _allowedLoginRole) {
+          CustomSnackbar.show(
+            message: 'Only client accounts can login in this app.',
+          );
+          return false;
+        }
         await LocalStorageService().saveSession(userData);
         state = state.copyWith(userData: userData, isGuestUser: false);
         getProfile();
@@ -292,6 +300,12 @@ class AuthNotifier extends StateNotifier<AuthState> {
     final localStorage = LocalStorageService();
     final savedSession = await LocalStorageService().getUserSession();
     if (savedSession == null) {
+      state = state.copyWith(userData: null, profileData: null, isGuestUser: true);
+      return false;
+    }
+    final role = savedSession.data.role.trim().toLowerCase();
+    if (role != _allowedLoginRole) {
+      await localStorage.clearSession();
       state = state.copyWith(userData: null, profileData: null, isGuestUser: true);
       return false;
     }

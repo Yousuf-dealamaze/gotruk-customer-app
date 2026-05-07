@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-Color primaryColor = "#003cc5".toColor();
+Color primaryColor = "#D67A3C".toColor();
 Color backgroundColor = "#F9F9F9".toColor();
 Color fontBlack = "#000000".toColor();
-Color greyFont = "#616161".toColor();
+Color greyFont = "#2B2B2B".toColor();
 Color cardColor = Colors.white;
 Color shadowColor = Colors.black12;
 Color successColor = const Color.fromARGB(255, 57, 145, 60);
